@@ -21,3 +21,194 @@ SUMO 培训——问题解答
 7、sumo底层交通模型是碰撞安全的，因此不会存在车辆碰撞的现象，如果出现了，基本上是因为道路或者交叉口控制方面的设置不对。
 
 8 虽然sumo是免碰撞的底层模型，但是利用它可以进行交通安全模拟，TTC,PET等指标的模拟。
+
+
+##  SUMO 培训
+
+
+
+问题列表：
+
+
+
+1  sumo 底层模型设计的是不可能撞车的，所以当系统提醒有车辆碰撞时，需要检查道路限速，车辆速度的设置，转向/信控的配置问题。
+
+2  目前sumo中包含了12中跟车模式，原始默认的跟车模式是 stefan krauf
+
+**3 sumo交通需求可以分批加载，以缓解预先整体把车流量加载进去后，造成效率的降低。但是如何利用程序sumo分批次加载呢？** duarouter->processing->routes-steps
+
+4  sumo-gui 选中检测器，邮件show parameters 对话框，选中具体的指标，可以试试一图形的形式展示，方便检擦，监控运行状态。 
+
+5 tripInfo 的输出文件，是最全的信息，可以重点关注。
+
+6 od2trips 工具根据OD matrix 分配路径，但是他分配时不考虑路径是否是有效联通 的。
+
+7 routes.atl.xml 是路径规划后，除了最佳路径后，规划的其他备选路径。因为规划路径时可以一次规划一个路径集。
+
+8 --validate    --fringe-factor     --min-distance 
+
+9 --trip-attributes="departLane=\"best\"  departSpeed=\"max\" departPos=\"random\"
+
+
+
+
+
+第二天
+
+10 sumo output 
+
+​	一氧化碳，二氧化碳，燃料消耗 三个环境指标目前比较可靠，稳定。
+
+11 可以模拟撞车，对象超车，换道，ttc ,pet,drac(deceleration to aviod collision)等安全指标
+
+12  如何用sumolib 开发自己的Traci fuction? 基本行不通。。。且bin中最底层的源代码并没有开源。
+
+
+
+13 交通分配-可以运行过程中更改路网。
+
+duarouter.exe  -> duaIterate.py ->main outputs in each iteration: 
+
+due in sumo -basuc options
+
+14 dynamic routing in sumo
+
+​	dynamic routing with devices 
+
+
+
+15 Calibration model
+
+​	result
+
+​	level of precision (macro micro)
+
+​	simulation
+
+​	network model
+
+​	traffic demand
+
+​	driver model
+
+​	set of parameters(behavior of driver,vehicle...)
+
+​	stochastcity (随机干扰)
+
+**仿真指导手册**-------以下几种。	calibration and validation
+
+德国微观仿真手册
+
+美国仿真手册
+
+Traffic simulation case for guidlines    英国-欧盟适用
+
+traffic analysis Toolbox    volume iii guidelines for applying ..    美国仿真手册
+
+ 15 混行仿真
+
+​	 do not adhere to lane marking if there are any
+
+​	lateral positioning model
+
+​	adaptions to car following
+
+
+
+### 16.1 net.xml文件中node, edge, junction 内部默认的编号规则是什么？？？有公开的资料吗？ 
+
+​	sumo 自己生成的node编号，带有gen   路段也用gen+数字的编号,对向路段加个“-”；中间节点时gen+position; junction 节点（节点合并的话）节点名称为cluster + 所要合并的节点名称。
+
+junction 
+
+#### ​	16.2  net 路网的矩阵坐标系，有可公开的资料介绍他吗？就是笛卡尔坐标
+
+#### ​	16.3  xml的 schema  xsd文件说明，有吗？看手册，不一定全，可以GitHub 反映。
+
+
+
+
+
+17 停车模拟
+
+​      add a stop in the route file:  加一条停车车辆的route路径
+
+​	
+
+```xml
+<vehicle id="stopped"  route="r0" color="red" departPos="40" depart="0">
+        <stop lane="gneE1_0" endPos="50" duration="100"/>
+</vehicle>
+```
+
+18 对向超车模拟- net的设置opposite 选项
+
+netedit -》F10 打开路网配置-》processing 选项 -》勾选 opposites.guess -》保存即可
+
+
+
+
+
+![1550817035413](C:\Users\lixuhong\AppData\Roaming\Typora\typora-user-images\1550817035413.png)
+
+
+
+也就是net.xml 文件 edge 属性的“neigh” 属性：
+
+```xml
+    <edge id="-gneE1" from="gneJ3" to="gneJ2" priority="-1">
+        <lane id="-gneE1_0" index="0" speed="13.89" length="149.47" shape="132.43,64.23 -17.04,64.93">
+            <neigh lane="gneE1_0"/>
+        </lane>
+    </edge>
+    <edge id="gneE1" from="gneJ2" to="gneJ3" priority="1">
+        <lane id="gneE1_0" index="0" speed="13.89" length="149.47" shape="-17.06,61.73 132.41,61.03">
+            <neigh lane="-gneE1_0"/>
+        </lane>
+    </edge>
+```
+
+原始的未设置edge opposite属性时的代码
+
+```xml
+    <edge id="-gneE1" from="gneJ3" to="gneJ2" priority="1">
+        <lane id="-gneE1_0" index="0" speed="13.89" length="149.48" shape="132.43,64.28 -17.05,64.98"/>
+    </edge>
+    <edge id="gneE1" from="gneJ2" to="gneJ3" priority="1">
+        <lane id="gneE1_0" index="0" speed="13.89" length="149.48" shape="-17.06,61.68 132.41,60.98"/>
+    </edge>
+```
+
+
+
+
+
+20 交通分配，数据量大的时候，建议one-shot模式而不是用户均衡，因为用户均衡要迭代多次，耗时
+
+
+
+
+
+21 project TransAID 
+
+ 	modelling cruise control and connected cruise control 
+
+​	mitigating the effiects of control takeover
+
+​	remote control
+
+​	model communication
+
+22 demand responsive Transport
+
+​	类似Taas
+
+​	scheduling automated vehicles
+
+​	what happens with enpty vehicles?
+
+​	what is the routing 
+
+
+
+23 practice to set up your 
