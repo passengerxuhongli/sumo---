@@ -1,0 +1,21 @@
+edge的type_xsd中有一个opthion arg ： bidi。 可实现双向道路
+思路：
+  定义两条完全重叠的道路,但是方向相反， e1, e2
+  将 net中edge定义的e1路段加上bidi='e2'; e2路段加上属性 bidi='e1' 即可完成双向道路模拟；
+  
+  
+      <edge id="977388714" from="J34" to="99855" name="Corson" priority="1" type="highway.cycleway_extra" spreadType="center" bidi="-26967263#0">
+        <lane id="977388714_0" index="0" allow="emergency authority bicycle custom1 custom2" speed="8.33" length="102.90" width="3.20" shape="1288.23,3114.87 1289.95,3011.98">
+            <param key="origId" value="977388714 26967263"/>
+        </lane>
+    </edge>
+    
+        <edge id="-26967263#0" from="99855" to="J34" name="Corson" priority="1" type="highway.cycleway_extra" spreadType="center" bidi="977388714">
+        <lane id="-26967263#0_0" index="0" allow="emergency authority bicycle custom1 custom2" speed="8.33" length="102.90" width="3.20" shape="1289.95,3011.98 1288.23,3114.87">
+            <param key="origId" value="26967263 977388714"/>
+        </lane>
+    </edge>
+  
+  官方案例： 
+  https://github.com/eclipse/sumo/issues/11436
+  
